@@ -4,12 +4,15 @@
   "description": "auth-service",
   "main": "index.js",
   "scripts": {
-    "dev": "node ./src/server"
+    "dev": "node ./src/server",
+    "format:check": "prettier . --check",
+    "format:fix": "prettier . --write"
   },
   "author": "Priyansh Singh Rajwar <rajwars.priyansh@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.12.5",
+    "prettier": "3.2.5",
     "typescript": "^5.4.4"
   }
 }
