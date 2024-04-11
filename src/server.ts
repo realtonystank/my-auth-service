@@ -7,5 +7,5 @@ const user = {
     name: 'Priyansh',
 };
 
-const x = user['name'].toLowerCase();
-console.log(x);
+const x = user.name.toLowerCase();
+console.log(x.toUpperCase());
