@@ -13,10 +13,12 @@ export default checkSchema({
     firstName: {
         errorMessage: 'first name is required!',
         notEmpty: true,
+        trim: true,
     },
     lastName: {
         errorMessage: 'last name is required!',
         notEmpty: true,
+        trim: true,
     },
     password: {
         notEmpty: {
@@ -26,5 +28,6 @@ export default checkSchema({
             options: { min: 8 },
             errorMessage: 'Password must be atleast 8 characters long.',
         },
+        trim: true,
     },
 });
