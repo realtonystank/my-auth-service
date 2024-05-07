@@ -3,19 +3,17 @@ import { RegisterUserRequest } from '../types';
 import { UserService } from '../services/UserService';
 import { Logger } from 'winston';
 import { validationResult } from 'express-validator';
-import { JwtPayload, sign } from 'jsonwebtoken';
-import fs from 'fs';
-import path from 'path';
-import createHttpError from 'http-errors';
-import { Config } from '../config';
+import { JwtPayload } from 'jsonwebtoken';
+import { TokenService } from '../services/TokenService';
+import { AppDataSource } from '../config/data-source';
+import { RefreshToken } from '../entity/RefreshToken';
 
 export class AuthController {
     constructor(
         private userService: UserService,
         private logger: Logger,
-    ) {
-        this.userService = userService;
-    }
+        private tokenService: TokenService,
+    ) {}
 
     async register(
         req: RegisterUserRequest,
@@ -43,38 +41,44 @@ export class AuthController {
                 password,
             });
             this.logger.info('User has been registered.', { id: user.id });
-            let privateKey: Buffer;
-            try {
-                privateKey = fs.readFileSync(
-                    path.join(__dirname, '../../certs/private.pem'),
-                );
-            } catch (err) {
-                const error = createHttpError(
-                    500,
-                    'Error while reading private key',
-                );
-                return next(error);
-            }
 
             const payload: JwtPayload = {
                 sub: String(user.id),
                 role: user.role,
             };
-            const accessToken = sign(payload, privateKey, {
-                algorithm: 'RS256',
-                expiresIn: '1h',
-                issuer: 'auth-service',
-            });
-            const refreshToken = sign(payload, Config.REFRESH_TOKEN_SECRET!, {
-                algorithm: 'HS256',
-                expiresIn: '2m',
-                issuer: 'auth-service',
-            });
+
+            const accessToken = this.tokenService.generateAccessToken(payload);
+
             res.cookie('accessToken', accessToken, {
                 domain: 'localhost',
                 sameSite: 'strict',
                 maxAge: 1000 * 60 * 60,
                 httpOnly: true,
+            });
+
+            const currentYear = new Date().getFullYear();
+            let isLeapYear = false;
+            if (currentYear % 4 === 0) {
+                if (currentYear % 100 === 0) {
+                    if (currentYear % 400 === 0) {
+                        isLeapYear = true;
+                    }
+                } else {
+                    isLeapYear = true;
+                }
+            }
+
+            const MS_IN_YEAR = 1000 * 60 * 60 * 24 * (isLeapYear ? 366 : 365);
+
+            const refreshTokenRepo = AppDataSource.getRepository(RefreshToken);
+            const newRefreshToken = await refreshTokenRepo.save({
+                user: user,
+                expiresAt: new Date(Date.now() + MS_IN_YEAR),
+            });
+
+            const refreshToken = await this.tokenService.generateRefreshToken({
+                ...payload,
+                id: String(newRefreshToken.id),
             });
             res.cookie('refreshToken', refreshToken, {
                 domain: 'localhost',
