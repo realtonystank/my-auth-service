@@ -18,7 +18,7 @@ describe('POST /auth/login', () => {
     });
 
     describe('Given all fields', () => {
-        it('should return 201 status code', async () => {
+        it('should return 200 status code', async () => {
             //user registers first
             const userData = {
                 firstName: 'Priyansh',
@@ -39,7 +39,7 @@ describe('POST /auth/login', () => {
                 .send({ email: userData.email, password: userData.password });
 
             //successful login
-            expect(res2.statusCode).toBe(201);
+            expect(res2.statusCode).toBe(200);
             expect(res.body).toHaveProperty('id');
             expect((res.body as { id: number }).id).toBeDefined;
         });

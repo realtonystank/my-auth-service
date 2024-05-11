@@ -134,7 +134,7 @@ export class AuthController {
                 httpOnly: true,
             });
             this.logger.info('User has been logged in', { id: user.id });
-            return res.status(201).json({ id: user.id });
+            return res.status(200).json({ id: user.id });
         } catch (err) {
             next(err);
         }
