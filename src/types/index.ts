@@ -5,6 +5,12 @@ export interface UserData {
     email: string;
     password: string;
 }
+
+export interface LoginData
+    extends Partial<Omit<UserData, 'email' | 'password'>> {
+    email: string;
+    password: string;
+}
 export interface RegisterUserRequest extends Request {
     body: UserData;
 }
