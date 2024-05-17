@@ -97,5 +97,25 @@ describe('POST /auth/login', () => {
 
             expect(res.body).not.toHaveProperty('password');
         });
+        it('should return 401 status code if token not exists', async () => {
+            //Register user
+            const userData = {
+                firstName: 'Priyansh',
+                lastName: 'Rajwar',
+                email: 'rajwars.priyansh@gmail.com',
+                password: 'secret12345',
+            };
+            const userRepository = AppDataSource.getRepository(User);
+            const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+            await userRepository.save({
+                ...userData,
+                password: hashedPassword,
+                role: Roles.CUSTOMER,
+            });
+            const res = await request(app).get('/auth/self').send();
+
+            expect(res.statusCode).toBe(401);
+        });
     });
 });
