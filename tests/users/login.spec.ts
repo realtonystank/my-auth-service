@@ -3,6 +3,9 @@ import { AppDataSource } from '../../src/config/data-source';
 import request from 'supertest';
 import app from '../../src/app';
 import { isJwt } from '../utils';
+import bcrypt from 'bcrypt';
+import { User } from '../../src/entity/User';
+import { Roles } from '../../src/constants';
 
 describe('POST /auth/login', () => {
     let connection: DataSource;
@@ -27,19 +30,21 @@ describe('POST /auth/login', () => {
                 password: 'secret12345',
             };
 
+            const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+            const userRepository = connection.getRepository(User);
+            await userRepository.save({
+                ...userData,
+                password: hashedPassword,
+                role: Roles.CUSTOMER,
+            });
+
             const res = await request(app)
-                .post('/auth/register')
-                .send(userData);
-
-            //successful registration of user
-            expect(res.statusCode).toBe(201);
-
-            const res2 = await request(app)
                 .post('/auth/login')
                 .send({ email: userData.email, password: userData.password });
 
             //successful login
-            expect(res2.statusCode).toBe(200);
+            expect(res.statusCode).toBe(200);
             expect(res.body).toHaveProperty('id');
             expect((res.body as { id: number }).id).toBeDefined;
         });
@@ -52,14 +57,16 @@ describe('POST /auth/login', () => {
                 password: 'secret12345',
             };
 
+            const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+            const userRepository = connection.getRepository(User);
+            await userRepository.save({
+                ...userData,
+                password: hashedPassword,
+                role: Roles.CUSTOMER,
+            });
+
             const res = await request(app)
-                .post('/auth/register')
-                .send(userData);
-
-            //successful registration of user
-            expect(res.statusCode).toBe(201);
-
-            const res2 = await request(app)
                 .post('/auth/login')
                 .send({ email: userData.email, password: userData.password });
 
@@ -70,7 +77,7 @@ describe('POST /auth/login', () => {
             let refreshToken: string | null = null;
 
             const cookies =
-                (res2.headers as unknown as Headers)['set-cookie'] || [];
+                (res.headers as unknown as Headers)['set-cookie'] || [];
 
             cookies.forEach((cookie) => {
                 if (cookie.startsWith('accessToken=')) {
@@ -97,20 +104,22 @@ describe('POST /auth/login', () => {
                 password: 'secret12345',
             };
 
-            const res = await request(app)
-                .post('/auth/register')
-                .send(userData);
+            const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-            //successful registration of user
-            expect(res.statusCode).toBe(201);
+            const userRepository = connection.getRepository(User);
+            await userRepository.save({
+                ...userData,
+                password: hashedPassword,
+                role: Roles.CUSTOMER,
+            });
 
             //providing wrong password
-            const res2 = await request(app)
+            const res = await request(app)
                 .post('/auth/login')
                 .send({ email: userData.email, password: 'secret1234' });
 
             //login fails due to wrong password
-            expect(res2.statusCode).toBe(400);
+            expect(res.statusCode).toBe(400);
         });
     });
 });
