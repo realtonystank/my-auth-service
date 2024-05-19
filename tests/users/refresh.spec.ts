@@ -2,7 +2,6 @@ import { DataSource } from 'typeorm';
 import { AppDataSource } from '../../src/config/data-source';
 import request from 'supertest';
 import app from '../../src/app';
-import createJWKSMock from 'mock-jwks';
 import { User } from '../../src/entity/User';
 import { Roles } from '../../src/constants';
 import { RefreshToken } from '../../src/entity/RefreshToken';
@@ -13,18 +12,12 @@ import { isJwt } from '../utils';
 
 describe('POST /auth/login', () => {
     let connection: DataSource;
-    let jwks: ReturnType<typeof createJWKSMock>;
     beforeAll(async () => {
         connection = await AppDataSource.initialize();
-        jwks = createJWKSMock('http://localhost:5501');
     });
     beforeEach(async () => {
-        jwks.start();
         await connection.dropDatabase();
         await connection.synchronize();
-    });
-    afterEach(() => {
-        jwks.stop();
     });
     afterAll(async () => {
         connection.destroy();
