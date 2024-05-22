@@ -10,7 +10,7 @@ import { sign } from 'jsonwebtoken';
 import { Config } from '../../src/config';
 import { isJwt } from '../utils';
 
-describe('POST /auth/login', () => {
+describe('POST /auth/refresh', () => {
     let connection: DataSource;
     beforeAll(async () => {
         connection = await AppDataSource.initialize();

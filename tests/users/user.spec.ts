@@ -7,7 +7,7 @@ import { User } from '../../src/entity/User';
 import { Roles } from '../../src/constants';
 import bcrypt from 'bcrypt';
 
-describe('POST /auth/login', () => {
+describe('POST /auth/self', () => {
     let connection: DataSource;
     let jwks: ReturnType<typeof createJWKSMock>;
     beforeAll(async () => {
