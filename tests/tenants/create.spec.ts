@@ -98,4 +98,23 @@ describe('POST /tenants', () => {
             expect(tenants).toHaveLength(0);
         });
     });
+    describe('Fields are missing', () => {
+        it('should return 400 if tenant is not provided with complete detials', async () => {
+            const tenantData = {
+                name: 'Tenant Name',
+            };
+
+            const res = await request(app)
+                .post('/tenants')
+                .set({ Cookie: [`accessToken=${adminToken}`] })
+                .send(tenantData);
+
+            expect(res.statusCode).toBe(400);
+            const tenantRepository = connection.getRepository(Tenant);
+
+            const tenants = await tenantRepository.find();
+
+            expect(tenants).toHaveLength(0);
+        });
+    });
 });
