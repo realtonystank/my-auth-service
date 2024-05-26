@@ -46,6 +46,7 @@ router.patch(
     '/:id',
     authenticate,
     canAccess([Roles.ADMIN]),
+    validateTenant,
     (req: Request, res: Response, next: NextFunction) =>
         tenantController.updateTenantById(req, res, next),
 );

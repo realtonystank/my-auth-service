@@ -3,17 +3,18 @@ import { TenantService } from '../services/TenantService';
 import { AuthRequest, CreateTenantRequest } from '../types';
 import { Logger } from 'winston';
 import { validationResult } from 'express-validator';
+import createHttpError from 'http-errors';
 export class TenantController {
     constructor(
         private tenantService: TenantService,
         private logger: Logger,
     ) {}
     async create(req: CreateTenantRequest, res: Response, next: NextFunction) {
-        const { name, address } = req.body;
         const validatorErrors = validationResult(req);
         if (!validatorErrors.isEmpty()) {
             return res.status(400).json({ error: validatorErrors.array() });
         }
+        const { name, address } = req.body;
 
         this.logger.debug('Request for creating a tenant.', req.body);
 
@@ -58,6 +59,10 @@ export class TenantController {
 
     async deleteTenantById(req: Request, res: Response, next: NextFunction) {
         const { id } = req.params;
+        if (isNaN(Number(id))) {
+            next(createHttpError(400, 'Invalid url param.'));
+            return;
+        }
         const _req = req as AuthRequest;
         this.logger.info(
             'Request to delete tenant ',
@@ -75,7 +80,16 @@ export class TenantController {
         }
     }
     async updateTenantById(req: Request, res: Response, next: NextFunction) {
+        const validatorErrors = validationResult(req);
+        if (!validatorErrors.isEmpty()) {
+            return res.status(400).json({ error: validatorErrors.array() });
+        }
+
         const { id } = req.params;
+        if (isNaN(Number(id))) {
+            next(createHttpError(400, 'Invalid url param.'));
+            return;
+        }
         const { name, address } = req.body;
         const _req = req as AuthRequest;
         this.logger.info(

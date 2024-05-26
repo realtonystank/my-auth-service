@@ -37,7 +37,10 @@ describe('PATCH /tenants/:id', () => {
             const tenantRepository = connection.getRepository(Tenant);
             await tenantRepository.save(tenantData);
 
-            const updatedData = { name: 'Tenant name updated' };
+            const updatedData = {
+                name: 'Tenant name updated',
+                address: tenantData.address,
+            };
 
             const res = await request(app)
                 .patch('/tenants/1')
