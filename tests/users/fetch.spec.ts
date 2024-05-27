@@ -73,3 +73,60 @@ describe('GET /users', () => {
         });
     });
 });
+
+describe('GET /users/:id', () => {
+    let connection: DataSource;
+    let jwks: ReturnType<typeof createJWKSMock>;
+    beforeAll(async () => {
+        connection = await AppDataSource.initialize();
+        jwks = createJWKSMock('http://localhost:5501');
+    });
+    beforeEach(async () => {
+        jwks.start();
+        await connection.dropDatabase();
+        await connection.synchronize();
+    });
+    afterEach(() => {
+        jwks.stop();
+    });
+    afterAll(async () => {
+        connection.destroy();
+    });
+
+    describe('Given all fields', () => {
+        it('should return 200 status', async () => {
+            const adminToken = jwks.token({ sub: '1', role: Roles.ADMIN });
+
+            const res = await request(app)
+                .get('/users/1')
+                .set({ Cookie: [`accessToken=${adminToken}`] })
+                .send();
+
+            expect(res.statusCode).toBe(200);
+        });
+        it('should return the user with id', async () => {
+            const userData = {
+                firstName: 'Priyansh',
+                lastName: 'Rajwar',
+                email: 'rajwars.priyansh@gmail.com',
+                password: 'secret12345',
+                role: Roles.MANAGER,
+            };
+
+            const userRepository = AppDataSource.getRepository(User);
+
+            await userRepository.save(userData);
+
+            const adminToken = jwks.token({ sub: '1', role: Roles.ADMIN });
+
+            const res = await request(app)
+                .get('/users/1')
+                .set({ Cookie: [`accessToken=${adminToken}`] })
+                .send();
+
+            expect(res.body).toHaveProperty('user');
+            expect(res.body.user).toHaveProperty('firstName');
+            expect(res.body.user.firstName).toBe(userData.firstName);
+        });
+    });
+});

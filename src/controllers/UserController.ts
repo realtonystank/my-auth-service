@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { UserService } from '../services/UserService';
 import { Roles } from '../constants';
+import createHttpError from 'http-errors';
 
 export class UserController {
     constructor(private userService: UserService) {}
@@ -27,6 +28,23 @@ export class UserController {
         try {
             const users = await this.userService.fetchAll();
             return res.json({ users });
+        } catch (err) {
+            next(err);
+            return;
+        }
+    }
+    async fetchOne(req: Request, res: Response, next: NextFunction) {
+        const { id } = req.params;
+        if (isNaN(Number(id))) {
+            const error = createHttpError(400, 'Possibly incorrect id');
+            next(error);
+            return;
+        }
+
+        try {
+            const user = await this.userService.findById(Number(id));
+
+            return res.json({ user });
         } catch (err) {
             next(err);
             return;

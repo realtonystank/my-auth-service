@@ -34,5 +34,8 @@ router.get(
     canAccess([Roles.ADMIN]) as RequestHandler,
     (req, res, next) => userController.fetchAll(req, res, next),
 );
+router.get('/:id', authenticate, canAccess([Roles.ADMIN]), (req, res, next) =>
+    userController.fetchOne(req, res, next),
+);
 
 export default router;
