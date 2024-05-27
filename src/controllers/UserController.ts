@@ -23,4 +23,13 @@ export class UserController {
             return;
         }
     }
+    async fetchAll(req: Request, res: Response, next: NextFunction) {
+        try {
+            const users = await this.userService.fetchAll();
+            return res.json({ users });
+        } catch (err) {
+            next(err);
+            return;
+        }
+    }
 }

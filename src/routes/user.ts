@@ -28,6 +28,11 @@ router.post(
         userController.create(req, res, next),
 );
 
-// router.get('/', authenticate, canAccess([Roles.ADMIN]) as RequestHandler,(req,res,next)=>);
+router.get(
+    '/',
+    authenticate,
+    canAccess([Roles.ADMIN]) as RequestHandler,
+    (req, res, next) => userController.fetchAll(req, res, next),
+);
 
 export default router;
