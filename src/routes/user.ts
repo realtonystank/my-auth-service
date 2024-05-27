@@ -32,10 +32,17 @@ router.get(
     '/',
     authenticate,
     canAccess([Roles.ADMIN]) as RequestHandler,
-    (req, res, next) => userController.fetchAll(req, res, next),
+    (req, res, next) => userController.fetchAllUsers(req, res, next),
 );
 router.get('/:id', authenticate, canAccess([Roles.ADMIN]), (req, res, next) =>
-    userController.fetchOne(req, res, next),
+    userController.fetchOneUser(req, res, next),
+);
+
+router.delete(
+    '/:id',
+    authenticate,
+    canAccess([Roles.ADMIN]),
+    (req, res, next) => userController.deleteUserById(req, res, next),
 );
 
 export default router;

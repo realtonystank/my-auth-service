@@ -24,7 +24,7 @@ export class UserController {
             return;
         }
     }
-    async fetchAll(req: Request, res: Response, next: NextFunction) {
+    async fetchAllUsers(req: Request, res: Response, next: NextFunction) {
         try {
             const users = await this.userService.fetchAll();
             return res.json({ users });
@@ -33,7 +33,7 @@ export class UserController {
             return;
         }
     }
-    async fetchOne(req: Request, res: Response, next: NextFunction) {
+    async fetchOneUser(req: Request, res: Response, next: NextFunction) {
         const { id } = req.params;
         if (isNaN(Number(id))) {
             const error = createHttpError(400, 'Possibly incorrect id');
@@ -45,6 +45,23 @@ export class UserController {
             const user = await this.userService.findById(Number(id));
 
             return res.json({ user });
+        } catch (err) {
+            next(err);
+            return;
+        }
+    }
+    async deleteUserById(req: Request, res: Response, next: NextFunction) {
+        const { id } = req.params;
+        if (isNaN(Number(id))) {
+            const error = createHttpError(400, 'Possibly incorrect id');
+            next(error);
+            return;
+        }
+
+        try {
+            await this.userService.deleteById(Number(id));
+
+            return res.status(204).send();
         } catch (err) {
             next(err);
             return;
