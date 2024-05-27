@@ -12,6 +12,7 @@ import { UserService } from '../services/UserService';
 import { AppDataSource } from '../config/data-source';
 import { User } from '../entity/User';
 import validateUser from '../validators/user-validator';
+import { CreateUserRequest } from '../types';
 
 const router = express.Router();
 
@@ -25,7 +26,7 @@ router.post(
     canAccess([Roles.ADMIN]) as RequestHandler,
     validateUser,
     (req: Request, res: Response, next: NextFunction) =>
-        userController.create(req, res, next),
+        userController.create(req as CreateUserRequest, res, next),
 );
 
 router.get(
@@ -36,6 +37,15 @@ router.get(
 );
 router.get('/:id', authenticate, canAccess([Roles.ADMIN]), (req, res, next) =>
     userController.fetchOneUser(req, res, next),
+);
+
+router.patch(
+    '/:id',
+    authenticate,
+    canAccess([Roles.ADMIN]),
+    validateUser,
+    (req: Request, res: Response, next: NextFunction) =>
+        userController.updateUserById(req as CreateUserRequest, res, next),
 );
 
 router.delete(

@@ -2,11 +2,17 @@ import { NextFunction, Request, Response } from 'express';
 import { UserService } from '../services/UserService';
 import { Roles } from '../constants';
 import createHttpError from 'http-errors';
+import { CreateUserRequest } from '../types';
+import { validationResult } from 'express-validator';
 
 export class UserController {
     constructor(private userService: UserService) {}
 
-    async create(req: Request, res: Response, next: NextFunction) {
+    async create(req: CreateUserRequest, res: Response, next: NextFunction) {
+        const validatorErrors = validationResult(req);
+        if (!validatorErrors.isEmpty()) {
+            return res.status(400).json({ error: validatorErrors.array() });
+        }
         const { firstName, lastName, email, password } = req.body;
 
         try {
@@ -45,6 +51,39 @@ export class UserController {
             const user = await this.userService.findById(Number(id));
 
             return res.json({ user });
+        } catch (err) {
+            next(err);
+            return;
+        }
+    }
+    async updateUserById(
+        req: CreateUserRequest,
+        res: Response,
+        next: NextFunction,
+    ) {
+        const validatorErrors = validationResult(req);
+        if (!validatorErrors.isEmpty()) {
+            return res.status(400).json({ error: validatorErrors.array() });
+        }
+        const { id } = req.params;
+        if (isNaN(Number(id))) {
+            const error = createHttpError(400, 'Possibly incorrect id');
+            next(error);
+            return;
+        }
+
+        const { firstName, lastName, email, password, role } = req.body;
+
+        try {
+            await this.userService.updateById(Number(id), {
+                firstName,
+                lastName,
+                email,
+                password,
+                role,
+            });
+
+            return res.status(204).send();
         } catch (err) {
             next(err);
             return;

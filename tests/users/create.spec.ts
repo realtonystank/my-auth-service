@@ -34,6 +34,7 @@ describe('POST /users', () => {
                 lastName: 'Last',
                 email: 'email@gmail.com',
                 password: 'secret12345',
+                role: Roles.MANAGER,
                 tenantId: 1,
             };
 
@@ -41,7 +42,6 @@ describe('POST /users', () => {
                 .post('/users')
                 .set({ Cookie: [`accessToken=${adminToken}`] })
                 .send(userData);
-
             expect(res.statusCode).toBe(201);
         });
         it('should persist the user in the database', async () => {
@@ -52,6 +52,7 @@ describe('POST /users', () => {
                 lastName: 'Rajwar',
                 email: 'rajwars.priyansh@gmail.com',
                 password: 'secret12345',
+                role: Roles.MANAGER,
                 tenantId: 1,
             };
 
@@ -75,6 +76,7 @@ describe('POST /users', () => {
                 lastName: 'Rajwar',
                 email: 'rajwars.priyansh@gmail.com',
                 password: 'secret12345',
+                role: Roles.MANAGER,
                 tenantId: 1,
             };
 
