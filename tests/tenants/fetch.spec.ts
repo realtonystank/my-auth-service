@@ -4,6 +4,7 @@ import request from 'supertest';
 import app from '../../src/app';
 import createJWKSMock from 'mock-jwks';
 import { Tenant } from '../../src/entity/Tenant';
+import { Roles } from '../../src/constants/';
 
 describe('GET /tenants', () => {
     let connection: DataSource;
@@ -27,7 +28,10 @@ describe('GET /tenants', () => {
 
     describe('Given all fields', () => {
         it('should return 200 status', async () => {
-            const res = await request(app).get('/tenants');
+            const adminToken = jwks.token({ sub: '1', role: Roles.ADMIN });
+            const res = await request(app)
+                .get('/tenants')
+                .set({ Cookie: [`accessToken=${adminToken}`] });
             expect(res.statusCode).toBe(200);
         });
         it('should return tenant when tenant id is given', async () => {
@@ -39,7 +43,12 @@ describe('GET /tenants', () => {
             const tenantRepository = connection.getRepository(Tenant);
             tenantRepository.save(tenantData);
 
-            const res = await request(app).get('/tenants/1').send();
+            const adminToken = jwks.token({ sub: '1', role: Roles.ADMIN });
+
+            const res = await request(app)
+                .get('/tenants/1')
+                .set({ Cookie: [`accessToken=${adminToken}`] })
+                .send();
 
             expect(res.statusCode).toBe(200);
             expect(res.body).toHaveProperty('tenant');
@@ -51,7 +60,12 @@ describe('GET /tenants', () => {
     });
     describe('Fields are missing', () => {
         it('should return 404 when wrong tenant id is fetched', async () => {
-            const res = await request(app).get('/tenants/1').send();
+            const adminToken = jwks.token({ sub: '1', role: Roles.ADMIN });
+
+            const res = await request(app)
+                .get('/tenants/1')
+                .set({ Cookie: [`accessToken=${adminToken}`] })
+                .send();
 
             expect(res.statusCode).toBe(404);
         });

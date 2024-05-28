@@ -32,8 +32,12 @@ router.post(
 router.get('/', (req: Request, res: Response, next: NextFunction) =>
     tenantController.fetchAllTenants(req, res, next),
 );
-router.get('/:id', (req: Request, res: Response, next: NextFunction) =>
-    tenantController.fetchTenantById(req, res, next),
+router.get(
+    '/:id',
+    authenticate,
+    canAccess([Roles.ADMIN]),
+    (req: Request, res: Response, next: NextFunction) =>
+        tenantController.fetchTenantById(req, res, next),
 );
 router.delete(
     '/:id',
