@@ -5,6 +5,8 @@ import app from '../../src/app';
 import createJWKSMock from 'mock-jwks';
 import { User } from '../../src/entity/User';
 import { Roles } from '../../src/constants';
+import { createTenant } from '../utils';
+import { Tenant } from '../../src/entity/Tenant';
 
 describe('POST /users', () => {
     let connection: DataSource;
@@ -27,6 +29,10 @@ describe('POST /users', () => {
 
     describe('Given all fields', () => {
         it('should return 201 status', async () => {
+            const tenant = await createTenant(
+                AppDataSource.getRepository(Tenant),
+            );
+
             const adminToken = jwks.token({ sub: '1', role: Roles.ADMIN });
 
             const userData = {
@@ -35,7 +41,7 @@ describe('POST /users', () => {
                 email: 'email@gmail.com',
                 password: 'secret12345',
                 role: Roles.MANAGER,
-                tenantId: 1,
+                tenantId: tenant.id,
             };
 
             const res = await request(app)
@@ -45,6 +51,9 @@ describe('POST /users', () => {
             expect(res.statusCode).toBe(201);
         });
         it('should persist the user in the database', async () => {
+            const tenant = await createTenant(
+                AppDataSource.getRepository(Tenant),
+            );
             const adminToken = jwks.token({ sub: '1', role: Roles.ADMIN });
 
             const userData = {
@@ -53,7 +62,7 @@ describe('POST /users', () => {
                 email: 'rajwars.priyansh@gmail.com',
                 password: 'secret12345',
                 role: Roles.MANAGER,
-                tenantId: 1,
+                tenantId: tenant.id,
             };
 
             await request(app)
@@ -69,6 +78,9 @@ describe('POST /users', () => {
             expect(users[0].email).toBe(userData.email);
         });
         it('should persist user with manager role', async () => {
+            const tenant = await createTenant(
+                AppDataSource.getRepository(Tenant),
+            );
             const adminToken = jwks.token({ sub: '1', role: Roles.ADMIN });
 
             const userData = {
@@ -77,7 +89,7 @@ describe('POST /users', () => {
                 email: 'rajwars.priyansh@gmail.com',
                 password: 'secret12345',
                 role: Roles.MANAGER,
-                tenantId: 1,
+                tenantId: tenant.id,
             };
 
             await request(app)
@@ -93,6 +105,9 @@ describe('POST /users', () => {
             expect(users[0].role).toBe(Roles.MANAGER);
         });
         it('should return 403 status when non-admin attempts to create a manager', async () => {
+            const tenant = await createTenant(
+                AppDataSource.getRepository(Tenant),
+            );
             const managerToken = jwks.token({ sub: '1', role: Roles.MANAGER });
 
             const userData = {
@@ -100,7 +115,7 @@ describe('POST /users', () => {
                 lastName: 'Rajwar',
                 email: 'rajwars.priyansh@gmail.com',
                 password: 'secret12345',
-                tenantId: 1,
+                tenantId: tenant.id,
             };
 
             const res = await request(app)

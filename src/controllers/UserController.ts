@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { UserService } from '../services/UserService';
-import { Roles } from '../constants';
 import createHttpError from 'http-errors';
 import { CreateUserRequest } from '../types';
 import { validationResult } from 'express-validator';
@@ -13,7 +12,8 @@ export class UserController {
         if (!validatorErrors.isEmpty()) {
             return res.status(400).json({ error: validatorErrors.array() });
         }
-        const { firstName, lastName, email, password } = req.body;
+        const { firstName, lastName, email, password, role, tenantId } =
+            req.body;
 
         try {
             const user = await this.userService.create({
@@ -21,7 +21,8 @@ export class UserController {
                 lastName,
                 email,
                 password,
-                role: Roles.MANAGER,
+                role,
+                tenantId,
             });
 
             return res.status(201).json({ id: user.id });
