@@ -112,7 +112,7 @@ export class AuthController {
             passoword: '******',
         });
         try {
-            const user = await this.userService.findByEmail(email);
+            const user = await this.userService.findByEmailWithPassword(email);
             if (!user) {
                 return next(
                     createHttpError(400, 'email or password is not correct.'),

@@ -71,6 +71,30 @@ describe('GET /users', () => {
 
             expect(res.statusCode).toBe(403);
         });
+        it('should not return password', async () => {
+            const userData = {
+                firstName: 'Priyansh',
+                lastName: 'Rajwar',
+                email: 'rajwars.priyansh@gmail.com',
+                password: 'secret12345',
+                role: Roles.MANAGER,
+            };
+
+            const userRepository = AppDataSource.getRepository(User);
+
+            await userRepository.save(userData);
+
+            const adminToken = jwks.token({ sub: '1', role: Roles.ADMIN });
+
+            const res = await request(app)
+                .get('/users')
+                .set({ Cookie: [`accessToken=${adminToken}`] })
+                .send();
+
+            expect(res.body).toHaveProperty('users');
+            expect(res.body.users).toHaveLength(1);
+            expect(res.body.users[0]).not.toHaveProperty('password');
+        });
     });
 });
 
