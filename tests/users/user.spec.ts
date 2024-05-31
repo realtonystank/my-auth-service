@@ -5,7 +5,7 @@ import app from '../../src/app';
 import createJWKSMock from 'mock-jwks';
 import { User } from '../../src/entity/User';
 import { Roles } from '../../src/constants';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 describe('POST /auth/self', () => {
     let connection: DataSource;
