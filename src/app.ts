@@ -6,9 +6,17 @@ import authRouter from './routes/auth';
 import tenantRouter from './routes/tenant';
 import userRouter from './routes/user';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import { Config } from './config';
 
 const app = express();
 
+app.use(
+    cors({
+        origin: Config.CORS_WHITELIST?.split(','),
+        credentials: true,
+    }),
+);
 app.use(express.static('public'));
 app.use(express.json());
 app.use(cookieParser());
